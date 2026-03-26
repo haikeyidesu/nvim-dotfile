@@ -1,0 +1,29 @@
+return {
+    -- 1. Flutter Tools (First Block)
+    {
+        'nvim-flutter/flutter-tools.nvim',
+        lazy = false,
+        dependencies = {
+            'nvim-lua/plenary.nvim',
+            'stevearc/dressing.nvim',
+        },
+        config = true,
+    }, -- <--- Don't forget this comma! It separates the blocks.
+
+    -- 2. Live Preview (Second Block - Separate!)
+    {
+        'brianhuster/live-preview.nvim',
+        dependencies = { 'nvim-telescope/telescope.nvim' }, -- (Just an example dependency)
+        config = true,
+    },
+
+    -- 3. The New Plugin: Live Server (Third Block - Separate!)
+    {
+        "barrett-ruth/live-server.nvim",
+        config = true,
+        cmd = { "LiveServerStart", "LiveServerStop", "LiveServerToggle" },
+        keys = {
+            { "<leader>ls", "<cmd>LiveServerToggle<CR>", desc = "Live Server" },
+        },
+    },
+}
