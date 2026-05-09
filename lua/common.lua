@@ -11,11 +11,22 @@ vim.opt.encoding = "utf-8"
 vim.opt.swapfile = false
 
 -- set tab and indent settings
-vim.opt.scrolloff = 7
+vim.opt.scrolloff = 999
 vim.opt.tabstop = 4
 vim.opt.softtabstop = 4
 vim.opt.shiftwidth = 4
 vim.opt.autoindent = true
+vim.opt.expandtab = true -- Use actual tabs, not spaces
+vim.opt.smarttab = true
+vim.opt.smartindent = true
+vim.opt.shiftround = true -- round indent
+vim.opt.list = true
+
+-- undoo
+vim.opt.undolevels = 10000
+
+-- disable modeline
+vim.opt.modeline = false
 
 -- set relative line numbers
 vim.wo.relativenumber = true
@@ -29,23 +40,30 @@ vim.opt.smoothscroll = true
 vim.opt.clipboard = "unnamedplus"
 
 -- persistent undo
--- create an undo directory to save history acrossrestarts
+-- create an undo directory to save history across restarts
 vim.opt.undofile = true
+
+-- what's this do?
+-- less notifications, disable intro default screen, removes some distracting completion popup thing ig
+vim.opt.shortmess:append({ W = true, I = true, c = true })
 
 -- clear search highlights with esc
 vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
 
 -- highlist when yanking
 vim.api.nvim_create_autocmd("TextYankPost", {
-	desc = "Highlight when yanking (copying) text",
-	group = vim.api.nvim_create_augroup("highlight-yank", { clear = true }),
-	callback = function()
-		vim.highlight.on_yank({
-			higroup = "IncSearch",
-			timeout = 150,
-		})
-	end,
+    desc = "Highlight when yanking (copying) text",
+    group = vim.api.nvim_create_augroup("highlight-yank", { clear = true }),
+    callback = function()
+        vim.highlight.on_yank({
+            higroup = "IncSearch",
+            timeout = 150,
+        })
+    end,
 })
+
+-- jj to enter normal mode (from insert mode)
+vim.keymap.set("i", "jj", "<Esc>")
 
 -- move between splits with ctrl + hjkl
 
@@ -57,7 +75,12 @@ vim.keymap.set("n", "<C-l>", "<C-w>l", { desc = "Move to right split" })
 -- highlight working line
 vim.opt.cursorline = true
 
--- for loading tabs
-vim.opt.expandtab = false -- Use actual tabs, not spaces
-vim.opt.tabstop = 4 -- Number of spaces a tab counts for
-vim.opt.shiftwidth = 4 -- Number of spaces for auto-indent
+vim.startofline = false
+
+vim.opt.virtualedit = "block"
+
+-- confirm save before exiting
+vim.opt.confirm = true
+
+-- have nvim respect your indentation stuff whatnot instead of overriding for markdown styling
+vim.g.markdown_recommended_style = 0
