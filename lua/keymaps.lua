@@ -47,15 +47,22 @@ vim.keymap.set("n", "<leader>t", ":terminal<CR>", { silent = true, desc = "Toggl
 vim.keymap.set("n", "<leader>R", ":source $MYVIMRC<CR>", { silent = true, desc = "Toggle NvimTree" })
 
 -- More!
+-- quick git push
+vim.keymap.set("n", "<leader>gP", function()
+    -- 1. Prompt the user for a commit message
+    vim.ui.input({ prompt = "📝 Commit message: " }, function(msg)
+        -- If you hit escape or leave it blank, cancel the whole thing
+        if not msg or msg == "" then
+            vim.notify("Push aborted: No commit message provided.", vim.log.levels.WARN)
+            return
+        end
 
--- no more vsnip
--- -- vsnip
--- -- Jump forward through snippet tabstops
--- vim.keymap.set({ "i", "s" }, "<Tab>", function()
---     return vim.fn["vsnip#jumpable"](1) == 1 and "<Plug>(vsnip-jump-next)" or "<Tab>"
--- end, { expr = true })
---
--- -- Jump backward through snippet tabstops
--- vim.keymap.set({ "i", "s" }, "<S-Tab>", function()
---     return vim.fn["vsnip#jumpable"](-1) == 1 and "<Plug>(vsnip-jump-prev)" or "<S-Tab>"
--- end, { expr = truw })
+        -- 2. Run the Fugitive commands sequentially
+        vim.cmd("Git add .")
+        vim.cmd('Git commit -m "' .. msg .. '"')
+        vim.cmd("Git push")
+
+        -- 3. Let you know it worked!
+        vim.notify("🚀 Code Pushed: " .. msg, vim.log.levels.INFO)
+    end)
+end, { desc = "Git: Add All, Commit, and Push" })

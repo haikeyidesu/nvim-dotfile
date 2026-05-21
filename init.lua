@@ -72,6 +72,9 @@ Plug("linux-cultist/venv-selector.nvim")
 -- telescope!
 Plug("nvim-telescope/telescope.nvim")
 Plug("nvim-lua/plenary.nvim")
+-- Git integrations
+Plug("lewis6991/gitsigns.nvim")
+Plug("tpope/vim-fugitive")
 
 vim.call("plug#end") -- Everything below this line knows plugins exist!
 
@@ -168,6 +171,8 @@ load("plugins.nvim_image")
 load("plugins.render_markdown")
 -- venv selector
 load("plugins.venv_selector")
+-- git integrations
+load("plugins.git_signs.lua")
 
 -- homepage!
 -- require("homepage").setup()

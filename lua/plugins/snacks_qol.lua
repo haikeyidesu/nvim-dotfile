@@ -22,6 +22,11 @@ require("snacks").setup({
     },
     scroll = { enabled = true },
     indent = { enabled = true },
+
+    -- disable snack's git stuff
+    git = { enabled = false },
+    gitbrowse = { enabled = false },
+    lazygit = { enabled = false },
 })
 
 -- 2. Keymaps
@@ -66,43 +71,6 @@ end, { desc = "Projects" })
 map("n", "<leader>fr", function()
     Snacks.picker.recent()
 end, { desc = "Recent" })
-
--- Git
-map("n", "<leader>gb", function()
-    Snacks.picker.git_branches()
-end, { desc = "Git Branches" })
-map("n", "<leader>gl", function()
-    Snacks.picker.git_log()
-end, { desc = "Git Log" })
-map("n", "<leader>gL", function()
-    Snacks.picker.git_log_line()
-end, { desc = "Git Log Line" })
-map("n", "<leader>gs", function()
-    Snacks.picker.git_status()
-end, { desc = "Git Status" })
-map("n", "<leader>gS", function()
-    Snacks.picker.git_stash()
-end, { desc = "Git Stash" })
-map("n", "<leader>gd", function()
-    Snacks.picker.git_diff()
-end, { desc = "Git Diff (Hunks)" })
-map("n", "<leader>gf", function()
-    Snacks.picker.git_log_file()
-end, { desc = "Git Log File" })
-
--- GitHub (gh)
-map("n", "<leader>gi", function()
-    Snacks.picker.gh_issue()
-end, { desc = "GitHub Issues (open)" })
-map("n", "<leader>gI", function()
-    Snacks.picker.gh_issue({ state = "all" })
-end, { desc = "GitHub Issues (all)" })
-map("n", "<leader>gp", function()
-    Snacks.picker.gh_pr()
-end, { desc = "GitHub Pull Requests (open)" })
-map("n", "<leader>gP", function()
-    Snacks.picker.gh_pr({ state = "all" })
-end, { desc = "GitHub Pull Requests (all)" })
 
 -- Search/Grep
 map("n", "<leader>sb", function()
@@ -226,12 +194,6 @@ end, { desc = "Delete Buffer" })
 map("n", "<leader>cR", function()
     Snacks.rename.rename_file()
 end, { desc = "Rename File" })
-map({ "n", "v" }, "<leader>gB", function()
-    Snacks.gitbrowse()
-end, { desc = "Git Browse" })
-map("n", "<leader>gg", function()
-    Snacks.lazygit()
-end, { desc = "Lazygit" })
 map("n", "<leader>un", function()
     Snacks.notifier.hide()
 end, { desc = "Dismiss All Notifications" })

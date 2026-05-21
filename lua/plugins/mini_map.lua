@@ -8,7 +8,7 @@ map.setup({
     integrations = {
         map.gen_integration.builtin_search(), -- Shows search results
         map.gen_integration.diagnostic(), -- Shows LSP errors/warnings
-        -- map.gen_integration.gitsigns(),    -- Uncomment if you use lewis6991/gitsigns.nvim
+        map.gen_integration.gitsigns(), -- Uncomment if you use lewis6991/gitsigns.nvim
     },
 
     -- 2. Visuals: How the code is drawn

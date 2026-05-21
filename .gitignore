@@ -1,0 +1,27 @@
+# =========================
+# Neovim Ignored Files
+# =========================
+
+# vim-plug plugin directory (keeps Git from tracking thousands of downloaded plugin files)
+plugged/
+
+# Vim swap, backup, and undo files (stops Git from tracking your live editing states)
+*.swp
+*.swo
+*~
+*.bak
+*.un~
+.netrwhist
+
+# =========================
+# OS Generated Files
+# =========================
+
+# macOS metadata files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows metadata files (just in case you ever share this config)
+Thumbs.db
+ehthumbs.db
