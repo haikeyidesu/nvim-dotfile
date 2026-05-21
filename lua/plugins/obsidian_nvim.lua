@@ -13,18 +13,7 @@ obsidian.setup({
     },
     -- UI customization
     ui = {
-        enable = true, -- set to false to disable all UI features
-        update_debounce = 200, -- update delay (ms) after typing stops
-        -- You can customize how links look:
-        external_link_icon = { char = "", hl_group = "ObsidianExtLinkIcon" },
-        reference_text = { hl_group = "ObsidianRefText" },
-        highlight_text = { hl_group = "ObsidianHighlightText" },
-        tags = { hl_group = "ObsidianTag" },
-        hl_groups = {
-            -- These match your theme's colors
-            ObsidianTodo = { bold = true, fg = "#f21055" },
-            ObsidianDone = { bold = true, fg = "#89ddff" },
-        },
+        enable = false, -- set to false to disable all UI features
     },
 
     -- THE NEW CHECKBOX SYSTEM

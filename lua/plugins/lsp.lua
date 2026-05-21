@@ -1,12 +1,12 @@
 -- Setup Mason
 require("mason").setup()
 require("mason-lspconfig").setup({
-	ensure_installed = { "pyright", "gopls", "lua_ls" }
+    ensure_installed = { "basedpyright", "gopls", "lua_ls" },
 })
 
 -- Setup standard servers
 -- local standard servers
-lspconfig = require('lspconfig')
+lspconfig = require("plugins.lsp_servers")
 
 -- Roslyn bridge for C#
 -- handles Roslyn requirements

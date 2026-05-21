@@ -45,3 +45,17 @@ vim.keymap.set("n", "<leader>t", ":terminal<CR>", { silent = true, desc = "Toggl
 
 -- reload nvim
 vim.keymap.set("n", "<leader>R", ":source $MYVIMRC<CR>", { silent = true, desc = "Toggle NvimTree" })
+
+-- More!
+
+-- no more vsnip
+-- -- vsnip
+-- -- Jump forward through snippet tabstops
+-- vim.keymap.set({ "i", "s" }, "<Tab>", function()
+--     return vim.fn["vsnip#jumpable"](1) == 1 and "<Plug>(vsnip-jump-next)" or "<Tab>"
+-- end, { expr = true })
+--
+-- -- Jump backward through snippet tabstops
+-- vim.keymap.set({ "i", "s" }, "<S-Tab>", function()
+--     return vim.fn["vsnip#jumpable"](-1) == 1 and "<Plug>(vsnip-jump-prev)" or "<S-Tab>"
+-- end, { expr = truw })

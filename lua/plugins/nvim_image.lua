@@ -1,37 +1,47 @@
 require("image").setup({
-    backend = "kitty", -- Ghostty uses the kitty protocol
+    backend = "kitty",
+    processor = "magick_cli",
     integrations = {
         markdown = {
             enabled = true,
-            clear_in_insert_mode = false,
-            download_remote_images = true,
-            only_render_image_at_cursor = false,
-            filetypes = { "markdown", "vimwiki", "obsidian" }, -- Add obsidian here
+            clear_in_insert_mode = true,
+            download_remote_images = false,
+            -- FIX 1: Only render what you see to prevent background crashes
+            only_render_image_at_cursor = true,
+            filetypes = { "markdown", "vimwiki", "obsidian" },
         },
     },
-    max_width = 100,
-    max_height = 12,
-    max_width_window_percentage = nil,
-    max_height_window_percentage = 50,
-    window_overlap_clear_enabled = false,
-    -- obsidian image path
-    resolve_image_path = function(image_path, current_buffer_path)
-        -- 1. Check if it's an Obsidian wikilink: ![[image.png]]
-        if image_path:match("^!%[%[(.*)%]%]$") then
-            local filename = image_path:match("^!%[%[(.*)%]%]$")
+    -- FIX 2: Ignore tiny or weirdly sized data blobs
+    min_width = 10,
+    min_height = 10,
 
-            -- 2. Define where your Obsidian images actually live
-            -- CHANGE THIS to your actual attachments folder path!
-            local vault_root =
-                "/Users/asher/Library/Mobile Documents/iCloud~md~obsidian/Documents/asher's obsidian vault/"
-            local attachments_folder = vault_root .. "attachments/"
-
-            -- 3. Return the absolute path so the plugin can find it
-            return attachments_folder .. filename
+    resolve_image_path = function(image_path, _)
+        -- FIX 3: THE SAFEGUARD
+        -- If the "path" is actually a giant Base64 string (longer than 1000 chars),
+        -- or starts with "data:", return nil so the plugin doesn't crash.
+        if image_path:match("^data:image") or #image_path > 1000 then
+            return nil
         end
 
-        -- Fallback for standard markdown links
+        local filename = image_path:match("!%[%[(.-)%]%]")
+        if not filename then
+            return image_path
+        end
+
+        local vault_root = "/Users/asher/Library/Mobile Documents/iCloud~md~obsidian/Documents/asher's obsidian vault/"
+
+        local paths_to_check = {
+            vault_root .. filename,
+            vault_root .. "attachments/" .. filename,
+            vim.fn.expand("%:p:h") .. "/" .. filename,
+        }
+
+        for _, path in ipairs(paths_to_check) do
+            if vim.fn.filereadable(path) == 1 then
+                return path
+            end
+        end
         return image_path
     end,
-    pipe_path = "/tmp/nvim-image-proxy", -- For remote/tmux support
+    tmux_passthrough = true,
 })

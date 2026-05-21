@@ -4,7 +4,7 @@ local Plug = vim.fn["plug#"]
 -- use terminal gui
 vim.opt.termguicolors = true
 
-vim.call("plug#begin")
+vim.call("plug#begin", "~/.config/nvim/plugged")
 
 -- theme: tokyonight
 Plug("folke/tokyonight.nvim")
@@ -52,7 +52,8 @@ Plug("folke/snacks.nvim")
 -- powerful formatter plugin
 Plug("stevearc/conform.nvim")
 Plug("folke/lazydev.nvim")
-Plug("gorbit99/codewindow.nvim")
+-- minimap
+Plug("echasnovski/mini.map")
 -- nvim surround, for adding quotes and braces around text
 Plug("kylechui/nvim-surround")
 Plug("obsidian-nvim/obsidian.nvim")
@@ -63,41 +64,67 @@ Plug("gelguy/wilder.nvim")
 -- for rendering images in nvim
 Plug("3rd/image.nvim")
 Plug("MeanderingProgrammer/render-markdown.nvim")
+-- luasnip and friends
+Plug("L3MON4D3/LuaSnip")
+Plug("saadparwaiz1/cmp_luasnip")
+Plug("rafamadriz/friendly-snippets") -- Pre-made snippets for Go, Lua, etc.
+Plug("linux-cultist/venv-selector.nvim")
+-- telescope!
+Plug("nvim-telescope/telescope.nvim")
+Plug("nvim-lua/plenary.nvim")
 
-vim.call("plug#end")
+vim.call("plug#end") -- Everything below this line knows plugins exist!
+
+-- Treesitter configuration moved here so it safely initializes after plug#end
+local status, configs = pcall(require, "nvim-treesitter.configs")
+if status then
+    configs.setup({
+        -- A list of parser names, or "all"
+        ensure_installed = { "lua", "vim", "vimdoc", "markdown", "markdown_inline", "go" },
+
+        -- Install parsers synchronously (only applied to `ensure_installed`)
+        sync_install = false,
+
+        -- Automatically install missing parsers when entering buffer
+        auto_install = true,
+
+        highlight = {
+            enable = true, -- MUST be true for the minimap to see colors!
+            additional_vim_regex_highlighting = false,
+        },
+        indent = {
+            enable = true,
+        },
+    })
+end
+
+-- In your lsp configuration
+vim.api.nvim_create_autocmd("LspAttach", {
+    callback = function(args)
+        local client = vim.lsp.get_client_by_id(args.data.client_id)
+        if client and client.server_capabilities.semanticTokensProvider then
+            client.server_capabilities.semanticTokensProvider = {
+                full = true,
+                legend = client.server_capabilities.semanticTokensProvider.legend,
+            }
+        end
+    end,
+})
 
 home = os.getenv("HOME")
-package.path = home .. "/.config/nvim/?.lua;" .. package.path
+-- package.path = home .. "/.config/nvim/?.lua;" .. package.path
 
-require("common")
-require("theme")
-require("keymaps")
-require("plugins.vimtree")
-require("plugins.barbar_plugin")
-require("plugins.lua_line")
-require("plugins.lsp")
-require("plugins.treesitter_setup")
-require("plugins.cmp_config")
-require("plugins.mason_setup")
-require("plugins.masonlsp_setup")
-require("plugins.autosession_setup")
-require("plugins.comment_config")
-require("plugins.indent_blankline_nvim")
--- enable for the nice command menu
--- require("noice_ui")
-require("plugins.snacks_qol")
-require("plugins.conform_formatter")
-require("plugins.lazy_dev")
-require("plugins.cw_minimap")
-require("plugins.nvim_surround")
-require("plugins.obsidian_nvim")
-require("plugins.nvim_autopairs")
-require("plugins.wilder_nvim")
-require("plugins.nvim_image")
-require("plugins.render_markdown")
+vim.notify("-( ) init.lua reached config section", vim.log.levels.INFO)
 
--- homepage!
--- require("homepage").setup()
+local function load(module)
+    local ok, err = pcall(require, module)
+    if not ok then
+        vim.notify("-[x] CRASH in " .. module .. ": " .. tostring(err), vim.log.levels.ERROR)
+        return false
+    end
+    vim.notify("-[v] Loaded: " .. module, vim.log.levels.INFO)
+    return true
+end
 
 -- Prevent Neovim from choking on massive files (like your GGUF)
 vim.api.nvim_create_autocmd("BufReadPre", {
@@ -111,6 +138,39 @@ vim.api.nvim_create_autocmd("BufReadPre", {
         end
     end,
 })
+
+-- Now safely loading modules using your custom load function wrapper
+load("common")
+load("theme")
+load("keymaps")
+load("plugins.vimtree")
+load("plugins.barbar_plugin")
+load("plugins.lsp_servers")
+load("plugins.lua_line")
+load("plugins.lsp")
+load("plugins.treesitter_setup")
+load("plugins.cmp_config")
+load("plugins.mason_setup")
+load("plugins.autosession_setup")
+load("plugins.comment_config")
+load("plugins.indent_blankline_nvim")
+-- enable for the nice command menu
+-- load("noice_ui")
+load("plugins.snacks_qol")
+load("plugins.conform_formatter")
+load("plugins.lazy_dev")
+load("plugins.mini_map")
+load("plugins.nvim_surround")
+load("plugins.obsidian_nvim")
+load("plugins.nvim_autopairs")
+load("plugins.wilder_nvim")
+load("plugins.nvim_image")
+load("plugins.render_markdown")
+-- venv selector
+load("plugins.venv_selector")
+
+-- homepage!
+-- require("homepage").setup()
 
 -- remove error things for markdown?
 vim.api.nvim_create_autocmd("FileType", {
