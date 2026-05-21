@@ -1,7 +1,7 @@
 require("auto-session").setup({
     bypass_save_filetypes = { "snacks_dashboard", "dashboard" },
     suppressed_dirs = { "~/", "~/Projects", "~/Downloads", "/" },
-    auto_restore_last_session = true,
+    auto_restore_last_session = false,
 })
 
 -- 󰜘 Changed: Removed "buffers" so background file histories don't pollute your top bar on startup

@@ -103,6 +103,7 @@ end, { desc = "LSP: Smart Hover (Docs or Errors)" })
 vim.keymap.set("n", "<C-S-l>", ":bnext<CR>", { silent = true, desc = "Buffers: Go to next file" })
 vim.keymap.set("n", "<C-S-h>", ":bprevious<CR>", { silent = true, desc = "Buffers: Go to prev file" })
 
+-----
 -- More!
 -- quick git push
 vim.keymap.set("n", "<leader>gP", function()
@@ -120,7 +121,7 @@ vim.keymap.set("n", "<leader>gP", function()
         vim.cmd("Git push")
 
         -- 3. Let you know it worked!
-        vim.notify("Code Pushed: " .. msg, vim.log.levels.INFO)
+        vim.notify("󰗡  Code Pushed: " .. msg, vim.log.levels.INFO)
     end)
 end, { desc = "Git: Add All, Commit, and Push" })
 
@@ -144,7 +145,7 @@ vim.keymap.set("n", "<leader>gc", function()
             return
         end
         vim.cmd('Git commit -m "' .. msg .. '"')
-        vim.notify("   Committed: " .. msg, vim.log.levels.INFO)
+        vim.notify(" 󰗡  Committed: " .. msg, vim.log.levels.INFO)
     end)
 end, { desc = "Git: Commit staged changes" })
 

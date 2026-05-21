@@ -105,6 +105,32 @@ if status then
     })
 end
 
+-- toggle off explorer and minimap on dashboard
+-- hide explorer and minimap panels when the dashboard opens
+vim.api.nvim_create_autocmd("FileType", {
+    pattern = "snacks_dashboard",
+    callback = function()
+        -- 1. Lock down mini.map so it disables and closes on this screen
+        vim.b.minimap_disable = true
+        if package.loaded["mini.map"] then
+            pcall(MiniMap.close)
+        end
+
+        -- 2. Scan and close any sidebar window pane (like Snacks Explorer)
+        for _, win in ipairs(vim.api.nvim_list_wins()) do
+            if vim.api.nvim_win_is_valid(win) then
+                local buf = vim.api.nvim_win_get_buf(win)
+                local ft = vim.bo[buf].filetype
+
+                -- Snacks Explorer uses 'snacks_picker_list' under the hood
+                if ft == "snacks_picker_list" or ft == "NvimTree" then
+                    pcall(vim.api.nvim_win_close, win, true)
+                end
+            end
+        end
+    end,
+})
+
 -- In your lsp configuration
 vim.api.nvim_create_autocmd("LspAttach", {
     callback = function(args)
@@ -121,8 +147,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
 home = os.getenv("HOME")
 -- package.path = home .. "/.config/nvim/?.lua;" .. package.path
 
-vim.notify("-( ) init.lua reached config section", vim.log.levels.INFO)
-
 local function load(module)
     local ok, err = pcall(require, module)
     if not ok then
@@ -137,11 +161,28 @@ local function load(module)
 
     -- 󰗡 Safe Guard: Stacks successful modules perfectly once Snacks loads up
     if _G.Snacks and Snacks.notify then
-        Snacks.notify.info("-[v] Loaded: " .. module)
-    else
-        vim.notify("-[v] Loaded: " .. module, vim.log.levels.INFO)
+        Snacks.notify.info(" 󰗡  Loaded: " .. module)
     end
     return true
+end
+
+-- Global LSP Message Deduplicator
+-- Catches rapid-fire duplicate alerts from language servers (like basedpyright)
+local last_lsp_message = ""
+local original_lsp_handler = vim.lsp.handlers["window/showMessage"]
+
+vim.lsp.handlers["window/showMessage"] = function(err, result, ctx, config)
+    if result and result.message then
+        -- If this message is identical to the last one received, ignore it completely
+        if result.message == last_lsp_message then
+            return
+        end
+        last_lsp_message = result.message
+
+        -- Optional: Completely mute this specific venv warning if it annoys you:
+        -- if result.message:match("venv .- subdirectory not found") then return end
+    end
+    return original_lsp_handler(err, result, ctx, config)
 end
 
 -- Prevent Neovim from choking on massive files (like your GGUF)
