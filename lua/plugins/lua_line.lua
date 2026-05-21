@@ -1,20 +1,31 @@
--- Gdiffsplit! pane labels
+-- Gdiffsplit! pane labels with dynamic version tracking
 local function git_diff_label()
     local bufname = vim.api.nvim_buf_get_name(0)
 
     -- 1. Check for standard 2-pane Git Diff (index version vs working file)
     if string.match(bufname, "//0") or string.match(bufname, "%.git_index") then
-        return "󰜘 COMMITTED VERSION"
+        return "󰜘 STAGED INDEX (PRE-COMMIT)"
 
-    -- 2. Check for 3-pane Merge Conflicts
+    -- 2. Check for an explicit Git commit/revision window (extracts the commit reference!)
+    elseif string.match(bufname, "fugitive://") and string.match(bufname, "%.git//") then
+        -- This extracts the specific commit hash/branch name out of Fugitive's internal URL
+        local commit_ref = string.match(bufname, "%.git//([^/]+)_")
+        if commit_ref then
+            return "󰜘 VER: " .. commit_ref:sub(1, 7) -- Shows the first 7 characters of the commit hash
+        end
+        return "󰜘 OLD VERSION"
+
+    -- 3. Check for 3-pane Merge Conflicts
     elseif string.match(bufname, "%.git//2_") or string.match(bufname, "//2") then
         return "󰜘 REMOTE (THEIRS)"
     elseif string.match(bufname, "%.git//3_") or string.match(bufname, "//3") then
         return "󰜘 LOCAL (YOURS)"
 
-    -- 3. Check for the general Fugitive status panel
+    -- 4. Check for the general Fugitive status panel
     elseif vim.bo.filetype == "fugitive" then
-        return "󰜘 GIT STATUS"
+        -- If it's the main status page, try to grab the current branch name
+        local branch = vim.fn.FugitiveHead()
+        return branch ~= "" and ("󰜘 GIT STATUS (" .. branch .. ")") or "󰜘 GIT STATUS"
     end
 
     -- Fallback to standard filename if it's a normal active file

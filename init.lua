@@ -1,6 +1,10 @@
 local vim = vim
 local Plug = vim.fn["plug#"]
 
+-- disable netrw hmm
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+
 -- use terminal gui
 vim.opt.termguicolors = true
 
@@ -9,7 +13,7 @@ vim.call("plug#begin", "~/.config/nvim/plugged")
 -- theme: tokyonight
 Plug("folke/tokyonight.nvim")
 -- nvim tree for the sidebar thing
-Plug("nvim-tree/nvim-tree.lua")
+-- Plug("nvim-tree/nvim-tree.lua")
 Plug("nvim-tree/nvim-web-devicons")
 -- barbar for nice tabs
 Plug("romgrk/barbar.nvim")
@@ -44,7 +48,7 @@ Plug("L3MON4D3/LuaSnip", { ["tag"] = "v2.*", ["do"] = "make install_jsregexp" })
 Plug("folke/trouble.nvim")
 -- UI component lib for nvim
 Plug("MunifTanjim/nui.nvim")
-Plug("rcarriga/nvim-notify")
+-- Plug("rcarriga/nvim-notify")
 -- nice command menu popup
 -- Plug('folke/noice.nvim')
 -- snacks, a collection of QoL plugins
@@ -122,10 +126,21 @@ vim.notify("-( ) init.lua reached config section", vim.log.levels.INFO)
 local function load(module)
     local ok, err = pcall(require, module)
     if not ok then
-        vim.notify("-[x] CRASH in " .. module .. ": " .. tostring(err), vim.log.levels.ERROR)
+        -- 󰜘 Safe Guard: Use Snacks if it exists, otherwise fall back to native vim.notify
+        if _G.Snacks and Snacks.notify then
+            Snacks.notify.error("-[x] CRASH in " .. module .. ": " .. tostring(err))
+        else
+            vim.notify("-[x] CRASH in " .. module .. ": " .. tostring(err), vim.log.levels.ERROR)
+        end
         return false
     end
-    vim.notify("-[v] Loaded: " .. module, vim.log.levels.INFO)
+
+    -- 󰗡 Safe Guard: Stacks successful modules perfectly once Snacks loads up
+    if _G.Snacks and Snacks.notify then
+        Snacks.notify.info("-[v] Loaded: " .. module)
+    else
+        vim.notify("-[v] Loaded: " .. module, vim.log.levels.INFO)
+    end
     return true
 end
 
@@ -146,7 +161,7 @@ vim.api.nvim_create_autocmd("BufReadPre", {
 load("common")
 load("theme")
 load("keymaps")
-load("plugins.vimtree")
+-- load("plugins.vimtree")
 load("plugins.barbar_plugin")
 load("plugins.lsp_servers")
 load("plugins.lua_line")
@@ -172,7 +187,7 @@ load("plugins.render_markdown")
 -- venv selector
 load("plugins.venv_selector")
 -- git integrations
-load("plugins.git_signs.lua")
+load("plugins.git_signs")
 
 -- homepage!
 -- require("homepage").setup()
@@ -185,13 +200,13 @@ vim.api.nvim_create_autocmd("FileType", {
     end,
 })
 
--- remove error things for python (for now)
-vim.api.nvim_create_autocmd("FileType", {
-    pattern = "python",
-    callback = function()
-        vim.diagnostic.enable(false, { bufnr = 0 })
-    end,
-})
+-- -- remove error things for python (for now)
+-- vim.api.nvim_create_autocmd("FileType", {
+--     pattern = "python",
+--     callback = function()
+--         vim.diagnostic.enable(false, { bufnr = 0 })
+--     end,
+-- })
 
 -- obsidian backlinking shortcut
 -- This will jump to the link under your cursor

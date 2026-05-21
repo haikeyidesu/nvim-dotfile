@@ -1,7 +1,45 @@
 -- 1. Setup Options
+-- 1. Setup Options
 require("snacks").setup({
     bigfile = { enabled = true },
-    dashboard = { enabled = true },
+    dashboard = {
+        enabled = true,
+
+        -- 󰜘 1. The official way to define custom ASCII art
+        -- don't touch!
+        preset = {
+            header = [[
+                   +÷±±±÷÷××××                    
+               ×÷÷÷÷=--÷±÷÷÷≈+÷±>>××±÷±              
+             +≈++><+-<+÷×-÷÷÷÷±÷÷÷÷÷÷÷÷÷÷           
+           +<×>>÷!>×-÷×÷±±-++>÷÷±>+÷××÷÷÷××÷÷        
+           !!!>>×>>-++++>->>!=+-+÷=±÷÷÷÷×××÷+>>         
+       ><>><>>+--=××=>>==+>;!+=+>>++±÷÷÷÷÷÷÷×=×÷     
+     <<<+>+>!!>×÷==+=×÷÷i!=+=-×≈<+>---÷÷±÷÷=-×÷>>-   
+     !!llI.>++!++++;!×=±I+++++×≠÷÷=I!<<×>±÷,l+<×>÷×  
+     !-.i<>l>>>>-<+-××-×<,!>>;I:!l.iIl<>>l!±÷±:il×<÷ 
+    !I>:ill<l<l :;.. i<!,.I!!l!ii:   !IIli:l!<=!>>++ 
+   !II.;..iI!..  ,,. .  ;..,., :.,.    ..   .I!<>->  
+   Il;I ,.:,:,.  .,. ..   .      . .,          I=   
+    ;,,...; ;;,. ...,,        :. ...... ..   Ii     
+         ;I,.;,;:....,..    . .;i:  ;;:  I,i       
+                        !;' ;!                        
+                        !;  ;!                        
+                        !;  ;!                        
+                        !;  ;l                        
+                                                 
+                          N E O V I M                         
+            ]],
+        },
+
+        sections = {
+            -- 󰜘 2. Call the native header section and apply your cool Cyan color!
+            { section = "header", hl = "DiagnosticHint", padding = 1 },
+            { section = "keys", gap = 1, padding = 1 },
+            { icon = " ", title = "Recent Files", section = "recent_files", indent = 2, padding = 1 },
+            { icon = " ", title = "Projects", section = "projects", indent = 2, padding = 1 },
+        },
+    },
     explorer = { enabled = true },
     indent = { enabled = true },
     input = { enabled = true },

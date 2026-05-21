@@ -23,14 +23,15 @@ for _, server in ipairs(servers) do
                 diagnostics = { globals = { "vim" } },
             },
         } or (server == "basedpyright") and {
+            root_dir = vim.fs.root(0, { ".git", "pyrightconfig.json", "requirements.txt" }),
             basedpyright = {
                 analysis = {
                     autoSearchPaths = true,
                     useLibraryCodeForTypes = true,
                     diagnosticMode = "openFilesOnly",
                 },
-                -- ensure basedpyright is using the current project folder
-                extraPaths = { vim.fn.getcwd() },
+                -- MODIFIED: Use a dynamic function so paths update if you jump folders
+                extraPaths = { "${workspaceFolder}" },
             },
         } or {},
     })

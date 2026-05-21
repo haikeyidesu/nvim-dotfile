@@ -25,9 +25,15 @@ map.setup({
     },
 })
 
--- ==========================================================================
+-- open up minimap on startup
+vim.api.nvim_create_autocmd("VimEnter", {
+    callback = function()
+        -- Safely open the map once everything is loaded
+        map.open()
+    end,
+})
+
 -- Keymaps (Restored from your codewindow setup)
--- ==========================================================================
 
 -- Toggle the minimap on and off
 vim.keymap.set("n", "<leader>mm", map.toggle, { desc = "Minimap: Toggle" })
