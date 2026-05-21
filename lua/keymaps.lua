@@ -125,6 +125,9 @@ vim.keymap.set("n", "<leader>gP", function()
     end)
 end, { desc = "Git: Add All, Commit, and Push" })
 
+-- open Git (fugitive)
+vim.keymap.set("n", "<leader>G", ":Git", { silent = true, desc = "Git: Enter command" })
+
 -- 1. Git Add (Interactive)
 vim.keymap.set("n", "<leader>ga", function()
     vim.ui.input({ prompt = ' 󰜘  Git add (e.g. ".", "file.lua"): ', default = "." }, function(input)
