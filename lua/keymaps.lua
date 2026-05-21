@@ -50,7 +50,7 @@ vim.keymap.set("n", "<leader>R", ":source $MYVIMRC<CR>", { silent = true, desc =
 -- quick git push
 vim.keymap.set("n", "<leader>gP", function()
     -- 1. Prompt the user for a commit message
-    vim.ui.input({ prompt = "📝 Commit message: " }, function(msg)
+    vim.ui.input({ prompt = "󰜘 Commit message: " }, function(msg)
         -- If you hit escape or leave it blank, cancel the whole thing
         if not msg or msg == "" then
             vim.notify("Push aborted: No commit message provided.", vim.log.levels.WARN)
@@ -63,6 +63,38 @@ vim.keymap.set("n", "<leader>gP", function()
         vim.cmd("Git push")
 
         -- 3. Let you know it worked!
-        vim.notify("🚀 Code Pushed: " .. msg, vim.log.levels.INFO)
+        vim.notify("Code Pushed: " .. msg, vim.log.levels.INFO)
     end)
 end, { desc = "Git: Add All, Commit, and Push" })
+
+-- 1. Git Add (Interactive)
+vim.keymap.set("n", "<leader>ga", function()
+    vim.ui.input({ prompt = ' 󰜘  Git add (e.g. ".", "file.lua"): ', default = "." }, function(input)
+        if not input or input == "" then
+            vim.notify("Git add canceled.", vim.log.levels.WARN)
+            return
+        end
+        vim.cmd("Git add " .. input)
+        vim.notify(" 󰗡  Staged: " .. input, vim.log.levels.INFO)
+    end)
+end, { desc = "Git: Add files" })
+
+-- 2. Git Commit (Interactive)
+vim.keymap.set("n", "<leader>gc", function()
+    vim.ui.input({ prompt = " 󰗡  Commit message: " }, function(msg)
+        if not msg or msg == "" then
+            vim.notify("Commit canceled: Empty message.", vim.log.levels.WARN)
+            return
+        end
+        vim.cmd('Git commit -m "' .. msg .. '"')
+        vim.notify("   Committed: " .. msg, vim.log.levels.INFO)
+    end)
+end, { desc = "Git: Commit staged changes" })
+
+-- navigate between hunks
+vim.keymap.set("n", "]c", function()
+    require("gitsigns").next_hunk()
+end, { desc = "Next Git Change" })
+vim.keymap.set("n", "[c", function()
+    require("gitsigns").prev_hunk()
+end, { desc = "Prev Git Change" })

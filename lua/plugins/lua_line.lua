@@ -1,3 +1,27 @@
+-- Gdiffsplit! pane labels
+local function git_diff_label()
+    local bufname = vim.api.nvim_buf_get_name(0)
+
+    -- 1. Check for standard 2-pane Git Diff (index version vs working file)
+    if string.match(bufname, "//0") or string.match(bufname, "%.git_index") then
+        return "󰜘 COMMITTED VERSION"
+
+    -- 2. Check for 3-pane Merge Conflicts
+    elseif string.match(bufname, "%.git//2_") or string.match(bufname, "//2") then
+        return "󰜘 REMOTE (THEIRS)"
+    elseif string.match(bufname, "%.git//3_") or string.match(bufname, "//3") then
+        return "󰜘 LOCAL (YOURS)"
+
+    -- 3. Check for the general Fugitive status panel
+    elseif vim.bo.filetype == "fugitive" then
+        return "󰜘 GIT STATUS"
+    end
+
+    -- Fallback to standard filename if it's a normal active file
+    return vim.fn.expand("%:t")
+end
+
+-- Single, unified lualine setup block
 require("lualine").setup({
     options = {
         icons_enabled = true,
@@ -20,7 +44,7 @@ require("lualine").setup({
     sections = {
         lualine_a = { "mode" },
         lualine_b = { "branch", "diff", "diagnostics" },
-        lualine_c = { "filename" },
+        lualine_c = { git_diff_label }, -- 󰜘 Uses our new smart label instead of raw text!
         lualine_x = { "encoding", "fileformat", "filetype" },
         lualine_y = { "progress" },
         lualine_z = { "location" },
@@ -28,7 +52,7 @@ require("lualine").setup({
     inactive_sections = {
         lualine_a = {},
         lualine_b = {},
-        lualine_c = { "filename" },
+        lualine_c = { git_diff_label }, -- Also apply it to inactive split windows!
         lualine_x = { "location" },
         lualine_y = {},
         lualine_z = {},
