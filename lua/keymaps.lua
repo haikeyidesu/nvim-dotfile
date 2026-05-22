@@ -30,11 +30,18 @@ end, { silent = true, desc = "Buffers: Smart close file or quit" })
 vim.keymap.set("n", "<leader>Q", ":qa<CR>", { desc = "Quit all" })
 
 -- Obsidian! :)
-vim.keymap.set("n", "<leader>o", ":Obsidian<CR>", { desc = "Obsidian commands" })
+vim.keymap.set("n", "<leader>oo", ":Obsidian<CR>", { desc = "Obsidian commands" })
+vim.keymap.set("n", "<leader>oO", ":Obsidian open<CR>", { desc = "Obsidian: open in Obsidian" })
+vim.keymap.set("n", "<leader>os", ":Obsidian quick_switch<CR>", { desc = "Obsidian: search" })
+vim.keymap.set("n", "<leader>od", ":Obsidian today<CR>", { desc = "Obsidian: daily note" })
+vim.keymap.set("n", "<leader>on", ":Obsidian new_from_template<CR>", { desc = "Obsidian: new note" })
+vim.keymap.set("n", "<leader>or", ":Obsidian rename<CR>", { desc = "Obsidian: rename note" })
+vim.keymap.set("n", "<leader>ot", ":Obsidian template<CR>", { desc = "Obsidian: note templates" })
+vim.keymap.set("n", "<leader>oT", ":Obsidian toc<CR>", { desc = "Obsidian: note Table of Contents" })
 vim.keymap.set("n", "gf", ":Obsidian follow_link<CR>", { desc = "Obsidian follow_link" })
 vim.keymap.set("n", "gr", ":Obsidian backlinks<CR>", { desc = "Obsidian backlinks" })
 -- Toggle conceal level between 0 and 2
-vim.keymap.set("n", "<leader>tc", function()
+vim.keymap.set("n", "<leader>Tc", function()
     if vim.opt_local.conceallevel:get() >= 1 then
         vim.opt_local.conceallevel = 0
     else
@@ -53,7 +60,8 @@ vim.keymap.set("n", "<leader>e", ":NvimTreeToggle<CR>", { silent = true, desc = 
 -- vim.keymap.set({ "n", "v", "i" }, "<leader>a", "ggVG", { desc = "Select all" })
 
 -- toggle terminal
-vim.keymap.set("n", "<leader>t", ":terminal<CR>", { silent = true, desc = "Toggle NvimTree" })
+-- use the terminal from Snacks
+vim.keymap.set({ "n", "t" }, "<leader>t", ":lua Snacks.terminal()<CR>", { silent = true, desc = "Toggle Terminal" })
 
 -- reload nvim
 vim.keymap.set("n", "<leader>R", ":source $MYVIMRC<CR>", { silent = true, desc = "Toggle NvimTree" })
@@ -127,6 +135,8 @@ end, { desc = "Git: Add All, Commit, and Push" })
 
 -- open Git (fugitive)
 vim.keymap.set("n", "<leader>G", ":Git", { silent = true, desc = "Git: Enter command" })
+
+vim.keymap.set("n", "<leader>gs", ":Git status<CR>", { silent = true, desc = "Git: Status" })
 
 -- 1. Git Add (Interactive)
 vim.keymap.set("n", "<leader>ga", function()
@@ -212,12 +222,12 @@ vim.api.nvim_create_autocmd({ "BufWinEnter", "WinEnter", "CursorMoved" }, {
 
             if current_win == right_win then
                 -- Cursor is on the right side (Normal Coding Workspace)
-                get_label = "󰜘 [ RESET: Left Overwrites Right ]"
-                put_label = "󰗡 [ STAGE: Right Overwrites Left ]"
+                get_label = "󰜘 [ RESET: ONLY LEFT ]"
+                put_label = "󰗡 [ STAGE: ONLY RIGHT ]"
             else
                 -- Cursor is on the left side (The Git Vault)
-                get_label = "󰜘 [ STAGE: Right Overwrites Left ]"
-                put_label = "󰀼 [ DANGER: Left Overwrites Right ]"
+                get_label = "󰜘 [ STAGE: ONLY LEFT ]"
+                put_label = "󰀼 [ DANGER: ONLY RIGHT ]"
             end
 
             vim.wo.winbar = table.concat({

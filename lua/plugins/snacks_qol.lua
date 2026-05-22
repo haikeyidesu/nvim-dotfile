@@ -282,6 +282,8 @@ else
 end
 
 -- Toggle Mappings
+-- Toggle the Snacks Terminal at the bottom
+Snacks.toggle.terminal("terminal", { name = "Terminal" }):map("<leader>t")
 Snacks.toggle.option("spell", { name = "Spelling" }):map("<leader>us")
 Snacks.toggle.option("wrap", { name = "Wrap" }):map("<leader>uw")
 Snacks.toggle.option("relativenumber", { name = "Relative Number" }):map("<leader>uL")
