@@ -61,6 +61,11 @@ require("snacks").setup({
     scroll = { enabled = true },
     indent = { enabled = true },
 
+    -- enable terminal
+    terminal = {
+        enabled = true,
+    },
+
     -- disable snack's git stuff
     git = { enabled = false },
     gitbrowse = { enabled = false },
@@ -223,9 +228,6 @@ end, { desc = "Toggle Zoom" })
 map("n", "<leader>.", function()
     Snacks.scratch()
 end, { desc = "Toggle Scratch Buffer" })
-map("n", "<leader>S", function()
-    Snacks.scratch.select()
-end, { desc = "Select Scratch Buffer" })
 map("n", "<leader>bd", function()
     Snacks.bufdelete()
 end, { desc = "Delete Buffer" })

@@ -29,6 +29,26 @@ end, { silent = true, desc = "Buffers: Smart close file or quit" })
 
 vim.keymap.set("n", "<leader>Q", ":qa<CR>", { desc = "Quit all" })
 
+-- split
+vim.keymap.set("n", "<leader>ph", ":split<CR>", { desc = "Split: Hoizontal" })
+vim.keymap.set("n", "<leader>pv", ":vsplit<CR>", { desc = "Split: Vertical" })
+-- Toggle a scratchpad split pane on the right side
+vim.keymap.set("n", "<leader>ps", function()
+    Snacks.scratch({
+        win = {
+            style = "split", -- Force it to be an editor panel layout instead of a float
+            position = "right", -- Snap it cleanly to the right side
+            width = 45, -- Set panel column width
+            wo = {
+                number = false, -- No line numbers (gives it that clean panel style)
+                relativenumber = false, -- No relative numbers
+                signcolumn = "no", -- Hides linter/LSP yellow warning marks on the left margin
+                statuscolumn = "", -- Strips away gutter clutter
+            },
+        },
+    })
+end, { desc = "Split: Buffer on the right" })
+
 -- Obsidian! :)
 vim.keymap.set("n", "<leader>oo", ":Obsidian<CR>", { desc = "Obsidian commands" })
 vim.keymap.set("n", "<leader>oO", ":Obsidian open<CR>", { desc = "Obsidian: open in Obsidian" })
