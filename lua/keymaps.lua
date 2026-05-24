@@ -153,6 +153,25 @@ vim.keymap.set("n", "<leader>gP", function()
     end)
 end, { desc = "Git: Add All, Commit, and Push" })
 
+-- quick git commit
+vim.keymap.set("n", "<leader>gC", function()
+    -- 1. Prompt the user for a commit message
+    vim.ui.input({ prompt = "󰜘 Commit message: " }, function(msg)
+        -- If you hit escape or leave it blank, cancel the whole thing
+        if not msg or msg == "" then
+            vim.notify("Push aborted: No commit message provided.", vim.log.levels.WARN)
+            return
+        end
+
+        -- 2. Run the Fugitive commands sequentially
+        vim.cmd("Git add .")
+        vim.cmd('Git commit -m "' .. msg .. '"')
+
+        -- 3. Let you know it worked!
+        vim.notify("󰗡  Code Committed: " .. msg, vim.log.levels.INFO)
+    end)
+end, { desc = "Git: Add All, and Commit" })
+
 -- open Git (fugitive)
 vim.keymap.set("n", "<leader>G", ":Git", { silent = true, desc = "Git: Enter command" })
 
