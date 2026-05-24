@@ -50,7 +50,7 @@ vim.opt.shortmess:append({ W = true, I = true, c = true })
 -- clear search highlights with esc
 vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
 
--- highlist when yanking
+-- highlight when yanking
 vim.api.nvim_create_autocmd("TextYankPost", {
     desc = "Highlight when yanking (copying) text",
     group = vim.api.nvim_create_augroup("highlight-yank", { clear = true }),
@@ -81,6 +81,9 @@ vim.opt.virtualedit = "block"
 
 -- confirm save before exiting
 vim.opt.confirm = true
+
+-- single global statusline at the bottom
+vim.opt.laststatus = 3 -- Enables a single, global statusline at the bottom
 
 -- have nvim respect your indentation stuff whatnot instead of overriding for markdown styling
 vim.g.markdown_recommended_style = 0

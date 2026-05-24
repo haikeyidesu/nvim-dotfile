@@ -6,6 +6,68 @@ vim.g.maplocalleader = " "
 -- vim.keymap.set("n", "j", "jzz")
 -- vim.keymap.set("n", "k", "kzz")
 
+-- resize panes
+local function smart_resize(amount)
+    local current_win = vim.api.nvim_get_current_win()
+
+    -- Helper to find whether the current window is nested in a row or a column split
+    local function find_parent_type(layout, parent_type)
+        if layout[1] == "leaf" then
+            return layout[2] == current_win and parent_type or nil
+        end
+        for _, child in ipairs(layout[2]) do
+            local res = find_parent_type(child, layout[1])
+            if res then
+                return res
+            end
+        end
+        return nil
+    end
+
+    local split_type = find_parent_type(vim.fn.winlayout(), nil)
+
+    if split_type == "row" then
+        vim.cmd("vertical resize " .. amount) -- Side-by-side splits -> adjust width
+    elseif split_type == "col" then
+        vim.cmd("resize " .. amount) -- Top-and-bottom splits -> adjust height
+    else
+        -- Fallback for complex grid layouts: adjust both
+        vim.cmd("vertical resize " .. amount)
+        vim.cmd("resize " .. amount)
+    end
+end
+-- Keymaps using the smart function
+vim.keymap.set("n", "<C-S-->", function()
+    smart_resize("-5")
+end, { silent = true, desc = "Smart shrink pane" })
+vim.keymap.set("n", "<C-S-=>", function()
+    smart_resize("+5")
+end, { silent = true, desc = "Smart grow pane" })
+
+-- panes divider highlight
+-- 1. Define a function to set the divider color
+local function apply_divider_color()
+    -- Swap "#E0AF68" with your theme's specific yellow hex code if you prefer
+    -- local divider_color = "#FFC777"
+    local divider_color = "#82AAFF"
+
+    -- Modern Neovim (0.7+) window separator
+    vim.api.nvim_set_hl(0, "WinSeparator", { fg = divider_color, bg = "none" })
+
+    -- Older Neovim compatibility (just in case)
+    vim.api.nvim_set_hl(0, "VertSplit", { fg = divider_color, bg = "none" })
+end
+-- 2. Run it immediately right now on startup
+apply_divider_color()
+-- 3. Run it again automatically if the colorscheme is reloaded or changed
+vim.api.nvim_create_autocmd("ColorScheme", {
+    callback = apply_divider_color,
+})
+
+-- rename
+-- Rename variable semantically using LSP
+vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, { desc = "LSP Rename variable" })
+
 -- map Shift + Ctrl + (j, k) to scroll more
 vim.keymap.set("n", "<S-C-j>", "<C-d>zz")
 vim.keymap.set("n", "<S-C-k>", "<C-u>zz")
@@ -30,7 +92,7 @@ end, { silent = true, desc = "Buffers: Smart close file or quit" })
 vim.keymap.set("n", "<leader>Q", ":qa<CR>", { desc = "Quit all" })
 
 -- split
-vim.keymap.set("n", "<leader>ph", ":split<CR>", { desc = "Split: Hoizontal" })
+vim.keymap.set("n", "<leader>pd", ":split<CR>", { desc = "Split: Hoizontal" })
 vim.keymap.set("n", "<leader>pv", ":vsplit<CR>", { desc = "Split: Vertical" })
 -- Toggle a scratchpad split pane on the right side
 vim.keymap.set("n", "<leader>ps", function()
