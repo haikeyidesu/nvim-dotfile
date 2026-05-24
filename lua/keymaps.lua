@@ -75,6 +75,36 @@ vim.keymap.set("n", "<S-C-k>", "<C-u>zz")
 -- save file and more
 vim.keymap.set("n", "<leader>w", ":w<CR>", { desc = "Save file" })
 
+_G.custom_winbar = function()
+    -- 1. Ignore the explorer, terminal, and other special floating/popup panels
+    local buftype = vim.bo.buftype
+    local filetype = vim.bo.filetype
+    if buftype == "nofile" or buftype == "terminal" or filetype == "snacks_explorer" or filetype == "snacks_picker" then
+        return "" -- Keeps your explorer sidebar completely clean
+    end
+
+    -- 2. Get the full absolute path of the buffer
+    local full_path = vim.api.nvim_buf_get_name(0)
+
+    -- 3. 🎯 Identify and rename any Snacks Scratch Buffers
+    if full_path:match("scratch/") then
+        -- Change "Scratch Pad" to whatever you prefer to call it!
+        return "%#DiagnosticWarn# 󱓧 Scratch Pad %="
+    end
+
+    -- 4. Standard files: Get the path relative to your current project root directory
+    local relative_path = vim.fn.fnamemodify(full_path, ":.")
+    if relative_path == "" then
+        return ""
+    end
+
+    -- 5. Return your clean yellow layout
+    return "%#DiagnosticWarn#  " .. relative_path .. " %="
+end
+
+-- Ensure Neovim's global winbar is linked to our updated function
+vim.opt.winbar = "%{%v:lua.custom_winbar()%}"
+
 -- smart quit: close current file buffer without breaking split layouts
 vim.keymap.set("n", "<leader>q", function()
     -- Get a list of all listed, valid file buffers

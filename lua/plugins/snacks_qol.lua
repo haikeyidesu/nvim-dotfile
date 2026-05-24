@@ -1,5 +1,4 @@
 -- 1. Setup Options
--- 1. Setup Options
 require("snacks").setup({
     bigfile = { enabled = true },
     dashboard = {

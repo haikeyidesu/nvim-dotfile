@@ -24,7 +24,7 @@ cmp.setup({
         ["<C-e>"] = cmp.mapping.abort(),
         ["<CR>"] = cmp.mapping(function(fallback)
             if cmp.visible() then
-                cmp.confirm({ select = false }) -- Only confirm if explicitly selected
+                cmp.confirm({ select = true }) -- Only confirm if explicitly selected
             else
                 fallback() -- Otherwise, just insert newline
             end
