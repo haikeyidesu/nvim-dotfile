@@ -122,11 +122,14 @@ end, { silent = true, desc = "Buffers: Smart close file or quit" })
 vim.keymap.set("n", "<leader>Q", ":qa<CR>", { desc = "Quit all" })
 
 -- split
-vim.keymap.set("n", "<leader>pd", ":split<CR>", { desc = "Split: Hoizontal" })
-vim.keymap.set("n", "<leader>pv", ":vsplit<CR>", { desc = "Split: Vertical" })
+vim.keymap.set("n", "<leader>pd", ":split<CR>", { desc = "Pane: Split Horizontal" })
+vim.keymap.set("n", "<leader>pv", ":vsplit<CR>", { desc = "Pane: Split Vertical" })
 -- Toggle a scratchpad split pane on the right side
 vim.keymap.set("n", "<leader>ps", function()
     Snacks.scratch({
+        ft = "markdown",
+        name = "Scratch Pad",
+        icon = "󱓧",
         win = {
             style = "split", -- Force it to be an editor panel layout instead of a float
             position = "right", -- Snap it cleanly to the right side
@@ -139,7 +142,23 @@ vim.keymap.set("n", "<leader>ps", function()
             },
         },
     })
-end, { desc = "Split: Buffer on the right" })
+end, { desc = "Pane: Scratch Pad buffer on the right" })
+vim.keymap.set("n", "<leader>pf", function()
+    Snacks.scratch({
+        ft = "markdown",
+        name = "Scratch Pad",
+        icon = "󱓧",
+        win = {
+            style = "float", -- 👈 Spawns as an independent centered floating card
+            width = 0.6, -- Spans 60% of screen width
+            height = 0.6, -- Spans 60% of screen height
+            border = "rounded",
+        },
+    })
+end, { desc = "Pane: Floating Scratch Pad buffer" })
+vim.keymap.set("n", "<leader>ph", function()
+    Snacks.scratch.select()
+end, { desc = "Pane: History, find old Scratch Pad buffers" })
 
 -- Obsidian! :)
 vim.keymap.set("n", "<leader>oo", ":Obsidian<CR>", { desc = "Obsidian commands" })
