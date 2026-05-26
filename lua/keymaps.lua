@@ -192,7 +192,9 @@ vim.keymap.set("n", "<leader>e", ":NvimTreeToggle<CR>", { silent = true, desc = 
 
 -- toggle terminal
 -- use the terminal from Snacks
-vim.keymap.set({ "n", "t" }, "<leader>t", ":lua Snacks.terminal()<CR>", { silent = true, desc = "Toggle Terminal" })
+vim.keymap.set({ "n", "t" }, "<leader>t", function()
+    Snacks.terminal.toggle()
+end, { silent = true, desc = "Toggle Terminal" })
 
 -- reload nvim
 vim.keymap.set("n", "<leader>R", ":source $MYVIMRC<CR>", { silent = true, desc = "Toggle NvimTree" })

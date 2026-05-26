@@ -79,6 +79,9 @@ Plug("nvim-lua/plenary.nvim")
 -- Git integrations
 Plug("lewis6991/gitsigns.nvim")
 Plug("tpope/vim-fugitive")
+-- harpoooon
+-- the harpoon man is here!
+Plug("ThePrimeagen/harpoon", { branch = "harpoon2" })
 
 vim.call("plug#end") -- Everything below this line knows plugins exist!
 
@@ -229,6 +232,7 @@ load("plugins.render_markdown")
 load("plugins.venv_selector")
 -- git integrations
 load("plugins.git_signs")
+load("plugins.harpoon_man")
 
 -- homepage!
 -- require("homepage").setup()
