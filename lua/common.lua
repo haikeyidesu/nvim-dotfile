@@ -1,5 +1,8 @@
 local vim = vim
 
+-- increase nvim's updatetime
+vim.opt.updatetime = 250
+
 -- display line numbers
 vim.wo.number = true
 
@@ -63,7 +66,7 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 })
 
 -- jj to enter normal mode (from insert mode)
-vim.keymap.set("i", "jj", "<Esc>")
+vim.keymap.set("i", "jk", "<Esc>")
 
 -- moved to keymaps.lua
 -- vim.keymap.set("n", "<C-h>", "<C-w>h", { desc = "Move to left split" })
@@ -86,3 +89,6 @@ vim.opt.laststatus = 3 -- Enables a single, global statusline at the bottom
 
 -- have nvim respect your indentation stuff whatnot instead of overriding for markdown styling
 vim.g.markdown_recommended_style = 0
+
+-- comment string?
+vim.bo.commentstring = "# %s"

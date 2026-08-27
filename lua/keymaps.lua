@@ -2,6 +2,295 @@
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
+-- lazy git!
+vim.keymap.set("n", "<leader>gg", function()
+    Snacks.terminal.open("lazygit", {
+        win = {
+            style = "float",
+            width = 0.95,
+            height = 0.95,
+            border = "rounded",
+        },
+    })
+end, { silent = true, desc = "Git: LazyGit" })
+
+-- html stuff
+-- open html
+vim.keymap.set("n", "<leader>ko", function()
+    local file = vim.fn.expand("%:p")
+
+    if vim.bo.filetype ~= "html" then
+        vim.api.nvim_echo({
+            { "✗ Current file is not HTML", "DiagnosticError" },
+        }, true, {})
+        return
+    end
+
+    vim.fn.jobstart({ "open", file }, { detach = true })
+end, { desc = "HTML: Open in browser" })
+
+-- html validation
+local w3c_ns = vim.api.nvim_create_namespace("w3c_validator")
+
+vim.keymap.set("n", "<leader>kv", function()
+    if vim.bo.filetype ~= "html" then
+        vim.api.nvim_echo({
+            { "✗ W3C validation is only available for HTML files", "DiagnosticError" },
+        }, true, {})
+        return
+    end
+
+    -- Save the current file first
+    vim.cmd("write")
+
+    local file = vim.fn.expand("%:p")
+
+    -- Run Nu Html Checker
+    local output = vim.fn.system({
+        "vnu",
+        file,
+    })
+
+    local diagnostics = {}
+    local errors = {}
+
+    for line in output:gmatch("[^\r\n]+") do
+        local lnum, col, message = line:match(":(%d+)%.(%d+)-%d+%.%d+: error: (.*)$")
+
+        if lnum and col and message then
+            lnum = tonumber(lnum)
+            col = tonumber(col)
+
+            table.insert(diagnostics, {
+                lnum = lnum - 1,
+                col = col - 1,
+                severity = vim.diagnostic.severity.ERROR,
+                message = message,
+                source = "vnu",
+            })
+
+            table.insert(errors, {
+                line = lnum,
+                col = col,
+                message = message,
+            })
+        end
+    end
+
+    -- Send errors to Neovim's diagnostic system
+    vim.diagnostic.set(w3c_ns, 0, diagnostics)
+
+    -- Nothing wrong!
+    if #errors == 0 then
+        vim.api.nvim_echo({
+            { "✓ HTML is valid!", "DiagnosticOk" },
+        }, true, {})
+        return
+    end
+
+    -- Build bottom command-line report
+    local messages = {
+        string.format("✗ W3C validation found %d issue(s):", #errors),
+        "",
+    }
+
+    for i, error in ipairs(errors) do
+        table.insert(messages, string.format("%d. Line %d:%d — %s", i, error.line, error.col, error.message))
+    end
+
+    -- Display everything in the bottom command area
+    vim.api.nvim_echo({
+        { table.concat(messages, "\n"), "DiagnosticError" },
+    }, true, {})
+end, { desc = "Validate HTML with Nu Html Checker" })
+
+-- Maps <leader>ca to trigger LSP Code Actions
+vim.keymap.set({ "x", "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, { desc = "LSP Code Action" })
+
+-- marks are kinda cool
+local function get_list_marks()
+    local active_marks = {}
+
+    -- Using the explicit current buffer number to be 100% safe
+    local bufnr = vim.fn.bufnr("%")
+
+    for _, m in ipairs(vim.fn.getmarklist(bufnr)) do
+        -- Robust fix: Strip the leading quote if it exists, leave it if it doesn't
+        local mark_char = m.mark:gsub("^'", "")
+
+        -- Check if it's strictly a lowercase letter (a-z)
+        if mark_char:match("^%l$") then
+            table.insert(active_marks, mark_char)
+        end
+    end
+
+    return active_marks
+end
+
+-- check for mark on line
+local function get_line_mark()
+    local current_line = vim.fn.line(".")
+
+    -- Safely invokes the function defined right above it
+    local active_marks = get_list_marks()
+
+    -- Loop through only the valid active marks
+    for _, m in ipairs(active_marks) do
+        -- Check if this specific mark is on the current line
+        if vim.fn.getpos("'" .. m)[2] == current_line then
+            return m -- Instantly return the mark character (e.g. "a")
+        end
+    end
+
+    return nil
+end
+
+-- command ooh
+vim.api.nvim_create_user_command("LineMarks", function()
+    local found_marks = {}
+    found_marks = get_line_mark()
+
+    if found_marks and #found_marks > 0 then
+        vim.api.nvim_echo({ { " Mark " .. found_marks, "diagnostichint" } }, false, {})
+        vim.defer_fn(function()
+            vim.api.nvim_echo({ { "", "" } }, false, {})
+        end, 8000)
+    else
+        vim.api.nvim_echo({ { "no marks on this line", "diagnosticsubtle" } }, false, {})
+        vim.defer_fn(function()
+            vim.api.nvim_echo({ { "", "" } }, false, {})
+        end, 8000)
+    end
+end, { desc = "check for marks on the current line" })
+
+-- command ooh
+vim.api.nvim_create_user_command("ShowMarks", function()
+    -- Directly assign the returned table
+    local found_marks = get_list_marks()
+
+    -- Check if the table exists and isn't empty
+    if found_marks and #found_marks > 0 then
+        -- Fix: Use table.concat because found_marks is a table/list
+        local marks_str = table.concat(found_marks, ", ")
+        vim.api.nvim_echo({ { " Active Marks: " .. marks_str, "diagnostichint" } }, false, {})
+        vim.defer_fn(function()
+            vim.api.nvim_echo({ { "", "" } }, false, {})
+        end, 8000)
+    else
+        -- Refined message to reflect the whole file scope
+        vim.api.nvim_echo({ { "no active marks found in this file", "diagnosticsubtle" } }, false, {})
+        vim.defer_fn(function()
+            vim.api.nvim_echo({ { "", "" } }, false, {})
+        end, 8000)
+    end
+end, { desc = "list all active marks in the current file" })
+
+-- show line mark keymap
+vim.keymap.set("n", "lm", function()
+    vim.cmd("LineMarks")
+end, { desc = "Line Mark" })
+vim.keymap.set("n", "lM", function()
+    vim.cmd("ShowMarks")
+end, { desc = "List Marks" })
+
+-- go to mark
+vim.keymap.set("n", "gm", function()
+    local mark = vim.fn.getcharstr()
+    local marks_list = get_list_marks()
+    if vim.tbl_contains(marks_list, mark) then
+        vim.cmd("normal! `" .. mark)
+        vim.cmd("redraw!")
+        vim.api.nvim_echo({ { " " .. mark, "diagnostichint" } }, false, {})
+        vim.defer_fn(function()
+            vim.api.nvim_echo({ { "", "" } }, false, {})
+        end, 8000)
+    else
+        vim.api.nvim_echo({ { " no mark " .. mark, "diagnostichint" } }, false, {})
+        vim.defer_fn(function()
+            vim.api.nvim_echo({ { "", "" } }, false, {})
+        end, 8000)
+    end
+end, { desc = "Go to mark" })
+
+-- delete vim mark
+local function delete_mark(mark)
+    if mark then
+        vim.cmd("delmarks " .. mark)
+        return true
+    else
+        return false
+    end
+end
+
+vim.keymap.set("n", "dm", function()
+    mark = get_line_mark()
+    delete_success = delete_mark(mark)
+    if delete_success then
+        vim.api.nvim_echo({ { "󰃆 deleted " .. mark, "diagnostichint" } }, false, {})
+        vim.defer_fn(function()
+            vim.api.nvim_echo({ { "", "" } }, false, {})
+        end, 8000)
+        vim.cmd("redraw!")
+    else
+        mark = vim.fn.getcharstr()
+        if mark then
+            delete_mark(mark)
+            vim.api.nvim_echo({ { "󰃆 deleted " .. mark, "diagnostichint" } }, false, {})
+            vim.defer_fn(function()
+                vim.api.nvim_echo({ { "", "" } }, false, {})
+            end, 8000)
+            vim.cmd("redraw!")
+            return
+        end
+        vim.api.nvim_echo({ { "󰃆 no mark to delete", "diagnostichint" } }, false, {})
+        vim.defer_fn(function()
+            vim.api.nvim_echo({ { "", "" } }, false, {})
+        end, 8000)
+    end
+end, { desc = "delete mark" })
+
+-- create mark
+vim.keymap.set("n", "m", function()
+    local mark = vim.fn.getcharstr()
+    if mark == "\27" or mark == "" then
+        return
+    end
+    if not mark:match("^%l$") then
+        return
+    end
+    local marks_list = get_list_marks()
+    local line_mark = get_line_mark()
+    -- helper variables for cursor location
+    local cur_line = vim.fn.line(".")
+    local cur_col = vim.fn.col(".") - 1
+    if vim.tbl_contains(marks_list, mark) then
+        if mark == line_mark then
+            delete_mark()
+            vim.api.nvim_buf_set_mark(0, mark, cur_line, cur_col, {})
+            vim.cmd("redraw!")
+            vim.api.nvim_echo({ { "󰸕 updated " .. mark, "diagnostichint" } }, false, {})
+            vim.defer_fn(function()
+                vim.api.nvim_echo({ { "", "" } }, false, {})
+            end, 8000)
+            return
+        end
+        vim.api.nvim_echo({ { "󰧎 " .. mark .. " already exists", "diagnostichint" } }, false, {})
+        vim.defer_fn(function()
+            vim.api.nvim_echo({ { "", "" } }, false, {})
+        end, 8000)
+        return
+    end
+    if line_mark then
+        delete_mark()
+    end
+    vim.api.nvim_buf_set_mark(0, mark, cur_line, cur_col, {})
+    vim.cmd("redraw!")
+    vim.api.nvim_echo({ { "󰃅 " .. mark, "diagnostichint" } }, false, {})
+    vim.defer_fn(function()
+        vim.api.nvim_echo({ { "", "" } }, false, {})
+    end, 8000)
+end, { desc = "create new mark" })
+
 -- remap j and k to keep cursor centred
 -- vim.keymap.set("n", "j", "jzz")
 -- vim.keymap.set("n", "k", "kzz")
@@ -94,10 +383,10 @@ local function smart_resize(amount)
     end
 end
 -- Keymaps using the smart function
-vim.keymap.set("n", "<C-S-->", function()
+vim.keymap.set("n", "<C-M-->", function()
     smart_resize("-5")
 end, { silent = true, desc = "Smart shrink pane" })
-vim.keymap.set("n", "<C-S-=>", function()
+vim.keymap.set("n", "<C-M-=>", function()
     smart_resize("+5")
 end, { silent = true, desc = "Smart grow pane" })
 
@@ -147,7 +436,7 @@ _G.custom_winbar = function()
     -- 3. 🎯 Identify and rename any Snacks Scratch Buffers
     if full_path:match("scratch/") then
         -- Change "Scratch Pad" to whatever you prefer to call it!
-        return "%#DiagnosticWarn# 󱓧 Scratch Pad %="
+        return "%#CustomWinbarText# 󱓧 Scratch Pad %="
     end
 
     -- 4. Standard files: Get the path relative to your current project root directory
@@ -163,7 +452,7 @@ _G.custom_winbar = function()
         harpoon_indicator = "󰈺↽ #" .. h_index .. " | "
     end
     -- 5. Return your clean yellow layout
-    return "%#DiagnosticWarn#  " .. harpoon_indicator .. relative_path .. " %="
+    return "%#CustomWinbarText#  " .. harpoon_indicator .. relative_path .. " %="
 end
 
 -- Ensure Neovim's global winbar is linked to our updated function
@@ -233,7 +522,13 @@ vim.keymap.set("n", "<leader>on", ":Obsidian new_from_template<CR>", { desc = "O
 vim.keymap.set("n", "<leader>or", ":Obsidian rename<CR>", { desc = "Obsidian: rename note" })
 vim.keymap.set("n", "<leader>ot", ":Obsidian template<CR>", { desc = "Obsidian: note templates" })
 vim.keymap.set("n", "<leader>oT", ":Obsidian toc<CR>", { desc = "Obsidian: note Table of Contents" })
-vim.keymap.set("n", "gf", ":Obsidian follow_link<CR>", { desc = "Obsidian follow_link" })
+vim.api.nvim_create_autocmd("FileType", {
+    pattern = "markdown",
+    callback = function()
+        -- Setting buffer = true means this ONLY applies to the current markdown file
+        vim.keymap.set("n", "gf", "<cmd>ObsidianFollowLink<CR>", { buffer = true, desc = "Obsidian Follow Link" })
+    end,
+})
 vim.keymap.set("n", "gr", ":Obsidian backlinks<CR>", { desc = "Obsidian backlinks" })
 -- Toggle conceal level between 0 and 2
 vim.keymap.set("n", "<leader>Tc", function()
@@ -251,14 +546,29 @@ end, { desc = "Toggle Conceal" })
 -- toggle nvim tree
 vim.keymap.set("n", "<leader>e", ":NvimTreeToggle<CR>", { silent = true, desc = "Toggle NvimTree" })
 
--- select all
--- vim.keymap.set({ "n", "v", "i" }, "<leader>a", "ggVG", { desc = "Select all" })
+-- yank all text
+vim.keymap.set("n", "<leader>a", function()
+    local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+    vim.fn.setreg("+", table.concat(lines, "\n") .. "\n")
+    vim.notify("  Copied all content", vim.log.levels.INFO)
+end, {
+    desc = "Yank entire file to clipboard",
+})
 
 -- toggle terminal
 -- use the terminal from Snacks
-vim.keymap.set({ "n", "t" }, "<leader>t", function()
+vim.keymap.set("n", "<leader>t", function()
     Snacks.terminal.toggle()
 end, { silent = true, desc = "Toggle Terminal" })
+
+vim.keymap.set("t", "<C-q>", function()
+    Snacks.terminal.toggle()
+end, { silent = true, desc = "Toggle Terminal" })
+
+vim.keymap.set("t", "<C-Esc>", "<C-\\><C-n>", {
+    silent = true,
+    desc = "Exit Terminal insert mode",
+})
 
 -- reload nvim
 vim.keymap.set("n", "<leader>R", ":source $MYVIMRC<CR>", { silent = true, desc = "Toggle NvimTree" })
@@ -469,3 +779,76 @@ end, { desc = "Next Git Change" })
 vim.keymap.set("n", "[c", function()
     require("gitsigns").prev_hunk()
 end, { desc = "Prev Git Change" })
+
+-- word counter
+vim.keymap.set("v", "<leader>c", function()
+    -- 1. Grab line count BEFORE yanking (while still in Visual mode)
+    local lines = math.abs(vim.fn.line("v") - vim.fn.line(".")) + 1
+
+    -- 2. Safely extract text
+    local old_reg = vim.fn.getreginfo("v")
+    vim.cmd('noau normal! "vy')
+    local text = vim.fn.getreg("v")
+    vim.fn.setreg("v", old_reg)
+
+    -- 3. Calculate metrics
+    local _, words = string.gsub(text, "%S+", "")
+    local chars_with = vim.fn.strchars(text)
+    local chars_without = vim.fn.strchars((string.gsub(text, "%s", "")))
+
+    local msg = string.format(
+        "Lines: %d | Words: %d | Chars: %d (with space) / %d (no space)",
+        lines,
+        words,
+        chars_with,
+        chars_without
+    )
+
+    -- 4. Display on the Command Line
+    vim.api.nvim_echo({ { msg, "Title" } }, true, {})
+
+    -- 5. Display in the Floating Window
+    local padded_msg = "  " .. msg .. "  "
+    local buf = vim.api.nvim_create_buf(false, true)
+    vim.api.nvim_buf_set_lines(buf, 0, -1, false, { padded_msg })
+
+    local win = vim.api.nvim_open_win(buf, false, {
+        relative = "cursor",
+        row = 1,
+        col = 0,
+        width = vim.fn.strdisplaywidth(padded_msg),
+        height = 1,
+        style = "minimal",
+        border = "rounded",
+    })
+
+    -- 6. Safe Auto-Close Mechanism
+    vim.schedule(function()
+        vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI", "BufLeave", "InsertEnter" }, {
+            buffer = 0,
+            once = true,
+            callback = function()
+                if vim.api.nvim_win_is_valid(win) then
+                    vim.api.nvim_win_close(win, true)
+                end
+            end,
+        })
+    end)
+end, { desc = "Count words and characters" })
+
+-- For java flowable BPMN.20 diagram Preview
+-- Press <leader>df on a BPMN XML file to copy its content & open bpmn.io
+vim.keymap.set("n", "<leader>df", function()
+    local file_path = vim.fn.expand("%:p")
+    local file_ext = vim.fn.expand("%:e")
+
+    -- If editing a BPMN/XML file, copy all contents to system clipboard first
+    if file_ext == "xml" or file_ext == "bpmn" or file_ext == "bpmn20" then
+        vim.cmd('normal! gg"+yG') -- Copies entire buffer to system clipboard '+'
+        vim.notify("Copied BPMN XML to clipboard! Press Cmd+V in the browser.", vim.log.levels.INFO)
+    end
+
+    -- Opens the browser on macOS ("open") or Linux ("xdg-open")
+    local open_cmd = vim.fn.has("mac") == 1 and "open" or "xdg-open"
+    vim.fn.jobstart({ open_cmd, "https://demo.bpmn.io" })
+end, { desc = "Display Flowable Diagram" })
