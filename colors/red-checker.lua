@@ -1,0 +1,1 @@
+require("red-checker").load()
