@@ -4,39 +4,79 @@
 local status, cmp_lsp = pcall(require, "cmp_nvim_lsp")
 local capabilities = status and cmp_lsp.default_capabilities() or {}
 
--- 2. Define your server list
-local servers = { "gopls", "basedpyright", "lua_ls" }
-
--- 3. Use the new Native API to configure and enable
-for _, server in ipairs(servers) do
-    -- This replaces the old .setup() call entirely
-    vim.lsp.config(server, {
-        capabilities = capabilities,
-        settings = (server == "gopls") and {
+-- 2. Define server configs cleanly (Fixes the misplaced root bug and messy ternaries)
+local server_configs = {
+    gopls = {
+        root_markers = { "go.work", "go.mod", ".git" },
+        settings = {
             gopls = {
                 analyses = { unusedparams = true },
                 staticcheck = true,
                 gofumpt = true,
             },
-        } or (server == "lua_ls") and {
+        },
+    },
+
+    lua_ls = {
+        root_markers = { ".luarc.json", ".git" },
+        settings = {
             Lua = {
                 diagnostics = { globals = { "vim" } },
             },
-        } or (server == "basedpyright") and {
-            root_dir = vim.fs.root(0, { ".git", "pyrightconfig.json", "requirements.txt" }),
+        },
+    },
+
+    basedpyright = {
+        -- FIX: root_markers belongs here at the top level, NOT inside settings!
+        root_markers = { ".git", "pyrightconfig.json", "requirements.txt", "pyproject.toml" },
+        settings = {
             basedpyright = {
                 analysis = {
                     autoSearchPaths = true,
                     useLibraryCodeForTypes = true,
                     diagnosticMode = "openFilesOnly",
                 },
-                -- MODIFIED: Use a dynamic function so paths update if you jump folders
                 extraPaths = { "${workspaceFolder}" },
             },
-        } or {},
-    })
+        },
+    },
 
-    -- This tells Neovim to actually start the server for its filetypes
+    vtsls = {
+        root_markers = {
+            "package.json",
+            "tsconfig.json",
+            "jsconfig.json",
+            ".git",
+        },
+    },
+
+    html = {
+        filetypes = { "html" },
+    },
+
+    cssls = {
+        filetypes = { "css", "scss", "less" },
+    },
+
+    emmet_language_server = {
+        filetypes = {
+            "html",
+            "css",
+            "scss",
+            "less",
+            "javascriptreact",
+            "typescriptreact",
+        },
+    },
+}
+
+-- 3. Loop through and apply configurations using Native Neovim API
+for server, config in pairs(server_configs) do
+    -- Inject the shared autocomplete capabilities
+    config.capabilities = capabilities
+
+    -- Register and trigger automatic activation
+    vim.lsp.config(server, config)
     vim.lsp.enable(server)
 end
 

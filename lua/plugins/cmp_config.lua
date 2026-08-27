@@ -3,6 +3,16 @@ vim.o.completeopt = "menu,menuone,noselect"
 -- Setup nvim-cmp.
 local cmp = require("cmp")
 
+-- Let LSP servers advertise completion support to nvim-cmp
+local capabilities = require("cmp_nvim_lsp").default_capabilities()
+
+-- Ruby LSP
+vim.lsp.config("ruby_lsp", {
+    cmd = { "ruby-lsp" },
+    capabilities = capabilities,
+})
+
+vim.lsp.enable("ruby_lsp")
 cmp.setup({
     snippet = {
         -- REQUIRED - you must specify a snippet engine
@@ -49,7 +59,7 @@ cmp.setup({
     }),
     sources = cmp.config.sources({
         { name = "nvim_lsp" },
-        { name = "vsnip" }, -- For vsnip users.
+        { name = "luasnip" }, -- For luasnip users.
         { name = "nvim_lsp_signature_help" },
     }, {
         { name = "buffer" },

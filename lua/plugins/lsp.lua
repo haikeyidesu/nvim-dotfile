@@ -6,7 +6,7 @@ require("mason-lspconfig").setup({
 
 -- Setup standard servers
 -- local standard servers
-lspconfig = require("plugins.lsp_servers")
+require("plugins.lsp_servers")
 
 -- Roslyn bridge for C#
 -- handles Roslyn requirements
