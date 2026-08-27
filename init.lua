@@ -12,6 +12,12 @@ vim.call("plug#begin", "~/.config/nvim/plugged")
 
 -- theme: tokyonight
 Plug("folke/tokyonight.nvim")
+-- theme: rose pine
+Plug("rose-pine/neovim", { ["as"] = "rose-pine" })
+-- theme: kanagawa (dragon)
+Plug("rebelot/kanagawa.nvim")
+-- theme: catpuccin
+Plug("catppuccin/nvim", { ["as"] = "catppuccin" })
 -- nvim tree for the sidebar thing
 -- Plug("nvim-tree/nvim-tree.lua")
 Plug("nvim-tree/nvim-web-devicons")
@@ -37,6 +43,8 @@ Plug("hrsh7th/cmp-nvim-lsp-signature-help")
 Plug("rmagatti/auto-session")
 -- comment plugin
 Plug("numToStr/Comment.nvim")
+-- TODO plugin
+Plug("folke/todo-comments.nvim")
 -- fzf lua
 Plug("ibhagwan/fzf-lua")
 Plug("karb94/neoscroll.nvim")
@@ -82,6 +90,19 @@ Plug("tpope/vim-fugitive")
 -- harpoooon
 -- the harpoon man is here!
 Plug("ThePrimeagen/harpoon", { branch = "harpoon2" })
+-- vim-tmux plugin
+Plug("christoomey/vim-tmux-navigator")
+-- colorizer
+Plug("NvChad/nvim-colorizer.lua")
+-- plugins for Jupyter notebook
+Plug("benlubas/molten-nvim", { ["do"] = ":UpdateRemotePlugins" })
+Plug("GCBallesteros/jupytext.nvim")
+Plug("jmbuhr/otter.nvim")
+-- lsp snippets
+Plug("lewis6991/async.nvim")
+Plug("ThePrimeagen/refactoring.nvim")
+-- for java
+Plug("mfussenegger/nvim-jdtls")
 
 vim.call("plug#end") -- Everything below this line knows plugins exist!
 
@@ -215,6 +236,7 @@ load("plugins.cmp_config")
 load("plugins.mason_setup")
 load("plugins.autosession_setup")
 load("plugins.comment_config")
+load("plugins.todo")
 load("plugins.indent_blankline_nvim")
 -- enable for the nice command menu
 -- load("noice_ui")
@@ -233,6 +255,10 @@ load("plugins.venv_selector")
 -- git integrations
 load("plugins.git_signs")
 load("plugins.harpoon_man")
+load("plugins.jupyter")
+load("plugins.otter_nvim")
+load("plugins.refactoring_nvim")
+load("plugins.jdtls_setup")
 
 -- homepage!
 -- require("homepage").setup()
@@ -250,34 +276,51 @@ vim.api.nvim_create_autocmd("FileType", {
     end,
 })
 
--- -- remove error things for python (for now)
--- vim.api.nvim_create_autocmd("FileType", {
---     pattern = "python",
+-- -- LSPs worth stopping when Neovim loses focus
+-- local heavy_lsps = {
+--     "jdtls", -- Java (JVM, very heavy)
+--     "rust_analyzer", -- Rust (continuous analysis)
+--     "clangd", -- C/C++ (large memory footprint)
+--     "pyright", -- Python (CPU spikes during type checking)
+-- }
+--
+-- -- Stop heavy LSPs when Neovim loses focus
+-- vim.api.nvim_create_autocmd("FocusLost", {
+--     pattern = "*",
 --     callback = function()
---         vim.diagnostic.enable(false, { bufnr = 0 })
+--         local clients = vim.lsp.get_clients()
+--         for _, client in ipairs(clients) do
+--             if vim.tbl_contains(heavy_lsps, client.name) then
+--                 vim.lsp.stop_client(client.id)
+--             end
+--         end
 --     end,
 -- })
-
--- obsidian backlinking shortcut
--- This will jump to the link under your cursor
--- vim.keymap.set("n", "gf", function()
---     if require("obsidian").util.smart_action() then
---         return
---     else
---         -- Fallback to native gf if not on an Obsidian link
---         vim.cmd("normal! gf")
---     end
--- end, { desc = "Smart Action / Go to File", buffer = true })
-
--- create new folder
--- vim.api.nvim_create_autocmd(
---     { "BufWritePre", },
---     {
---         callback = function(event)
---             if event.match:match("^%w%w+:[\\/][\\/]") then
---                 return
+--
+-- -- Restart them when you come back
+-- -- NOTE: Highly recommended to keep this commented out.
+-- -- Auto-restarting jdtls on focus will freeze your editor for 10-20s
+-- -- while the JVM boots up. It's better to just let it start naturally
+-- -- when you open a new Java file.
+-- --[[
+-- vim.api.nvim_create_autocmd("FocusGained", {
+--     pattern = "*",
+--     callback = function()
+--         local filetype_to_lsp = {
+--             java = "jdtls",
+--             rust = "rust_analyzer",
+--             c = "clangd",
+--             cpp = "clangd",
+--             python = "pyright",
+--         }
+--         local lsp = filetype_to_lsp[vim.bo.filetype]
+--
+--         -- Only attempt to restart if it's not already running
+--         if lsp and vim.tbl_contains(heavy_lsps, lsp) then
+--             if #vim.lsp.get_clients({ name = lsp }) == 0 then
+--                 vim.cmd("LspStart " .. lsp)
 --             end
---             local file = vim.uv.fs_realpath(event.match) or event.match vim.fn.mkdir(vim.fn.fnamemodify(file, ":h", "p")
---         end,
---     }
--- )
+--         end
+--     end,
+-- })
+-- --]]
