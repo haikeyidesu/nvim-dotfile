@@ -25,3 +25,4 @@ plugged/
 # Windows metadata files (just in case you ever share this config)
 Thumbs.db
 ehthumbs.db
+.aider*
