@@ -79,22 +79,22 @@ end, { desc = "Harpoon: Set Mark #1" })
 
 vim.keymap.set("n", "<leader>ha2", function()
     require("harpoon"):list():replace_at(2)
-    vim.notify("󰈺 Marked #1")
+    vim.notify("󰈺 Marked #2")
 end, { desc = "Harpoon: Set Mark #2" })
 
 vim.keymap.set("n", "<leader>ha3", function()
     require("harpoon"):list():replace_at(3)
-    vim.notify("󰈺 Marked #1")
+    vim.notify("󰈺 Marked #3")
 end, { desc = "Harpoon: Set Mark #3" })
 
 vim.keymap.set("n", "<leader>ha4", function()
     require("harpoon"):list():replace_at(4)
-    vim.notify("󰈺 Marked #1")
+    vim.notify("󰈺 Marked #4")
 end, { desc = "Harpoon: Set Mark #4" })
 
 vim.keymap.set("n", "<leader>ha5", function()
     require("harpoon"):list():replace_at(5)
-    vim.notify("󰈺 Marked #1")
+    vim.notify("󰈺 Marked #5")
 end, { desc = "Harpoon: Set Mark #5" })
 
 -- keymaps for harpoons 1 to 5

@@ -37,7 +37,7 @@ require("barbar").setup({
         pinned = { button = "", filename = true },
         preset = "default",
         alternate = { filetype = { enabled = false } },
-        current = { buffer_index = true },
+        current = { buffer_index = false },
         inactive = { button = "×" },
         visible = { modified = { buffer_number = false } },
     },
